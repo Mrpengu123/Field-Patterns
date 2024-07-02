@@ -159,6 +159,7 @@ def run():
         v[p // 2 + 1] = 1
 
         # "Time" (n) evolution
+        # This is where the propigation is calculated, google the transfer matrix method
         for n in range(t):
             v = np.power(M, n + 1).dot(v)
             # v /= np.linalg.norm(v)  # Normalize at each step
