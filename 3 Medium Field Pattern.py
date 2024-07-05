@@ -2,19 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-# Code by Mary (Evelyn) van den Akker, and Kyle Smith
+# Code by Kyle Smith, and Mary (Evelyn) van den Akker
 # Last edited 6/6/2024
 
 def run():
-    # Material properties, pick any non-negative properties
-    med1 = 5
-    med2 = 2
-    med3 = 3
-
+    
     # This for loop exists, so I could generate a bunch of frames to
     # animate the eigenvalues, right now it only runs one loop
-    # it isn't needed, but I will leave it anyway
-    for z in range(1, 2):
+    # it isn't needed, but I will leave it anyway, don't feel like reformatting
+    for z in range(1):
 
         # Forward Wave
         def Jf(a, b):
@@ -34,7 +30,7 @@ def run():
 
 
         # Number of cells
-        c = 300
+        c = 500
         # Number of points
         e = 4
         # Number of total points
@@ -44,6 +40,10 @@ def run():
         # d loop
         M = np.zeros((p, p))
 
+        # Material properties, pick any non-negative properties
+        med1 = 1
+        med2 = 1
+        med3 = 1
 
         # The form this indexing takes is the following:
         # $$
@@ -114,6 +114,7 @@ def run():
             M[((4 * (d + 1)) + 1) % p, 4 * d + 3] += Jb(med1, med2) * Jt(med2, med1) * Jt(med1, med3) * Jb(med3, med1)
             M[((4 * (d + 1)) + 2) % p, 4 * d + 3] += Jb(med1, med2) * Jt(med2, med1) * Jt(med1, med3) * Jf(med3, med1)
 
+
         # Calculating the Eigenvalues and Eigenvectors
         eigValues, eigVectors = np.linalg.eig(M)
 
@@ -140,14 +141,15 @@ def run():
         plt.ylabel(r'Imag$(\lambda)$', fontsize=14)
 
         # Plot the titles
-        plt.title("Eigenvalues for n = 300 case with med1 = {0}, med2 = {1}, med3 = {2}".format(med1, med2, med3))
+        plt.title("Eigenvalues for n = 50 case with med1 = {0}, med2 = {1}, med3 = {2}".format(med1, med2, med3))
         plt.axis('equal')
         plt.legend()
 
-        t = 20  # Number of time steps
+        t = 150  # Number of time steps
 
         # Initialize matrices
         m = np.zeros((t, p))
+        u = np.zeros((t, p))
 
         # Set up the injected Current
 
@@ -156,13 +158,13 @@ def run():
 
         # -Creates a vector of the whole length with the midpoint set to 1
         v = np.zeros(p)
-        v[p // 2 + 1] = 1
+        v[p // 2 + 0] = 1
 
-        # "Time" (n) evolution
-        # This is where the propigation is calculated, google the transfer matrix method
+        # "Time" (n) evolution, look at the transfer matrix method!
         for n in range(t):
+            # Transfer matrix method, n + 1 bc x^0 = 1, will look BUSTED
             v = np.power(M, n + 1).dot(v)
-            # v /= np.linalg.norm(v)  # Normalize at each step
+            # Extract all the real values
             m[n, :] = np.real(v)
 
         # Define space and time axes
@@ -172,13 +174,15 @@ def run():
         # Create a 3D mesh plot
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
+        ax.view_init(elev=20, azim=130)
         X, Y = np.meshgrid(x, y)
-        ax.plot_surface(X, Y, m, cmap='viridis')
+        # These blow up fast, it has got log10 scaling to actually show you the amplitudes
+        ax.plot_surface(X, Y, np.log10(m), cmap='magma')
 
         # Labels
-        ax.set_xlabel('space', fontsize=14)
+        ax.set_xlabel('4m + k', fontsize=14)
         ax.set_ylabel('n', fontsize=14)
-        ax.set_zlabel('amplitude of the wave', fontsize=14)
+        ax.set_zlabel('amplitude of the wave 10^', fontsize=14)
 
         # Show the plot
         plt.show()
@@ -189,13 +193,6 @@ def run():
         plt.title("Greens Matrix")
         plt.show()
 
-        # These exist to increment the mediums for the animation frames
-        # med1 += 0.05
-        # med2 += 0.05
-        # med3 += 0.05
-
 
 if __name__ == '__main__':
     run()
-
-# Hey this is Kyle, if you get too confused send me a text at Three85-8Three1-98Four5. I can help
